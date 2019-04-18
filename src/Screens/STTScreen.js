@@ -12,6 +12,10 @@ import Voice from 'react-native-voice';
 
 
 export default class VoiceTest extends Component {
+  static navigationOptions = {
+    title: 'Speech-to-Text',
+    /* No more header config here! */
+  };
   constructor(props) {
     super(props);
     this.state = {

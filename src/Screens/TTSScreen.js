@@ -1,16 +1,15 @@
 import React, { Component } from "react";
 import {
-  Platform,
   StyleSheet,
   Text,
   View,
   Button,
-  FlatList,
-  Slider,
   TextInput,
+  TouchableNativeFeedback,
   Keyboard
 } from "react-native";
 import Tts from "react-native-tts";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default class TTSScreen extends Component {
     static navigationOptions = {
@@ -20,7 +19,7 @@ export default class TTSScreen extends Component {
   state = {
     voices: [],
     ttsStatus: "initiliazing",
-    selectedVoice: "en-in-x-cxx#female_1-local",
+    selectedVoice: "",
     speechRate: 0.5,
     speechPitch: 1,
     text: "This is an example text"
@@ -51,14 +50,15 @@ export default class TTSScreen extends Component {
       });
     let selectedVoice = null;
     if (voices && voices.length > 0) {
-      selectedVoice = voices[0].id;
+      selectedVoice = voices[17].id;
       try {
         await Tts.setDefaultLanguage(voices[0].language);
+        // console.log(voices);
       } catch (err) {
         // My Samsung S9 has always this error: "Language is not supported"
         console.log(`setDefaultLanguage error `, err);
       }
-      await Tts.setDefaultVoice(voices[0].id);
+      await Tts.setDefaultVoice(voices[17].id);
       this.setState({
         voices: availableVoices,
         selectedVoice,
@@ -74,16 +74,6 @@ export default class TTSScreen extends Component {
     Tts.speak(this.state.text);
   };
 
-  setSpeechRate = async rate => {
-    await Tts.setDefaultRate(rate);
-    this.setState({ speechRate: rate });
-  };
-
-  setSpeechPitch = async rate => {
-    await Tts.setDefaultPitch(rate);
-    this.setState({ speechPitch: rate });
-  };
-
   onVoicePress = async voice => {
     try {
       await Tts.setDefaultLanguage(voice.language);
@@ -94,56 +84,26 @@ export default class TTSScreen extends Component {
     await Tts.setDefaultVoice(voice.id);
     this.setState({ selectedVoice: voice.id });
   };
-
-  renderVoiceItem = ({ item }) => {
-    return (
-      <Button
-        title={`${item.language} - ${item.name || item.id}`}
-        color={this.state.selectedVoice === item.id ? undefined : "#969696"}
-        onPress={() => this.onVoicePress(item)}
-      />
-    );
-  };
-
+  clearText = ()=>{
+    this.setState({text:''})
+  }
   render() {
+    const speakerIcon = <Icon 
+                          name="volume-up" 
+                          size={75} 
+                          color="#64B5F6" 
+                          backgroundColor="#fff"
+                          iconStyle={{margin:5}}
+                        />
+      const clearIcon = <Icon 
+                          name="times" 
+                          size={75} 
+                          color="#f44336" 
+                          backgroundColor="#fff"
+                          iconStyle={{margin:5}}
+                        />
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>{`React Native TTS Example`}</Text>
-
-        <Button title={`Read text`} onPress={this.readText} />
-
-        <Text style={styles.label}>{`Status: ${this.state.ttsStatus ||
-          ""}`}</Text>
-
-        <Text style={styles.label}>{`Selected Voice: ${this.state
-          .selectedVoice || ""}`}</Text>
-
-        <View style={styles.sliderContainer}>
-          <Text
-            style={styles.sliderLabel}
-          >{`Speed: ${this.state.speechRate.toFixed(2)}`}</Text>
-          <Slider
-            style={styles.slider}
-            minimumValue={0.01}
-            maximumValue={0.99}
-            value={this.state.speechRate}
-            onSlidingComplete={this.setSpeechRate}
-          />
-        </View>
-
-        <View style={styles.sliderContainer}>
-          <Text
-            style={styles.sliderLabel}
-          >{`Pitch: ${this.state.speechPitch.toFixed(2)}`}</Text>
-          <Slider
-            style={styles.slider}
-            minimumValue={0.5}
-            maximumValue={2}
-            value={this.state.speechPitch}
-            onSlidingComplete={this.setSpeechPitch}
-          />
-        </View>
-
         <TextInput
           style={styles.textInput}
           multiline={true}
@@ -151,6 +111,22 @@ export default class TTSScreen extends Component {
           value={this.state.text}
           onSubmitEditing={Keyboard.dismiss}
         />
+        <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between', alignItems:'center'}}>
+          <View>
+            <TouchableNativeFeedback onPress={this.readText}>
+              <View style={styles.btn}>
+                {speakerIcon}
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+          <View>
+            <TouchableNativeFeedback onPress={this.clearText}>
+              <View style={styles.clrBtn}>
+                {clearIcon}
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+        </View>
       </View>
     );
   }
@@ -158,36 +134,41 @@ export default class TTSScreen extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 26,
+    // marginTop: 26,
     flex: 1,
-    justifyContent: "center",
+    // justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5FCFF"
   },
-  title: {
-    fontSize: 20,
-    textAlign: "center",
-    margin: 10
+  btn: {
+    width:100,
+    height:100,
+    borderRadius:100/2,
+    backgroundColor:"#fff",
+    alignItems:'center',
+    justifyContent: 'center',
+    borderColor:"#64B5F6",
+    borderWidth: 2,
+    marginTop:25,
+    marginRight:25,
   },
-  label: {
-    textAlign: "center"
-  },
-  sliderContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  sliderLabel: {
-    textAlign: "center",
-    marginRight: 20
-  },
-  slider: {
-    width: 150
+  clrBtn:{
+    width:100,
+    height:100,
+    borderRadius:100/2,
+    backgroundColor:"#fff",
+    alignItems:'center',
+    justifyContent: 'center',
+    borderColor:"#f44336",
+    borderWidth: 2,
+    marginTop:25,
+    marginLeft:25
   },
   textInput: {
     borderColor: "gray",
-    borderWidth: 1,
-    flex: 1,
-    width: "100%"
+    borderBottomWidth: 1,
+    height:300,
+    // flex: 1,
+    width: "100%",
+    fontSize:48
   }
 });
